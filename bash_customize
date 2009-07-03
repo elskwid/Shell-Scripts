@@ -20,8 +20,8 @@ alias .p='source ~/.bash_customize && echo "Reloading bash customizations..."'
 alias ?="h | g $1"
 alias ..='cd ..'
 alias ...='cd .. ; cd ..'
-## lists folders and files sizes in the current folder
 alias ducks='du -cksh * | sort -rn|head -11' 
+      ## lists folders and files sizes in the current folder
 alias f='find . -iname'
 alias g="grep --color=auto"
 alias h="history"
@@ -29,16 +29,17 @@ alias hexkey64="dd if=/dev/random bs=1 count=16 2>/dev/null |xxd -ps"
 alias la='ls -a'
 alias ll="ls -laF --color=auto"
 alias m='more'
-# from: http://lifehacker.com/software/how-to/turbocharge-your-terminal-274317.php
 alias profileme="history | \
                  awk '{print \$2}' | \
                  awk 'BEGIN{FS=\"|\"}{print \$1}' | \
                  sort | uniq -c | sort -n | tail -n 20 | sort -nr"
+      # from: http://lifehacker.com/software/how-to/turbocharge-your-terminal-274317.php
 alias ps?="ps ax | g $1"
 alias x="exit"
 
 
-# Things to do -------------------------------------------------------------
+# Things to do -----------------------------------------------------------
+set_platform
 
 set_source_directory
 
@@ -46,61 +47,67 @@ include_optional_scripts
 
 set_custom_path
 
-# Define Linux specific configuration
-system_linux() {
+# Platform specific settings ---------------------------------------------
 
-    # Shortcut for text editor
-    if [ -f `which komodo` ]; then
-        alias m8='`which komodo` $1'
-    fi
+if [ "$PLATFORM" == "linux" ]; then
+  
+  # Define Linux specific configuration
 
-    # Use custom shell prompt
-    PROMPT_COMMAND=bash_prompt_command
-    set_bash_prompt
-    unset_bash_prompt
-}
+  # Shortcut for text editor
+  if [ -f `which komodo` ]; then
+      alias m8='`which komodo` $1'
+  fi
 
-# Define Mac specific configuration
-# TODO: Not yet tested
-system_darwin() {
-    
-    local textmate=`which mate`
-    
-    # Textmate for every editor
-    if [ -f ${textmate} ]; then
-        export EDITOR=${textmate}
-    fi
+  # Use custom shell prompt
+  PROMPT_COMMAND=bash_prompt_command
+  set_bash_prompt
+  unset_bash_prompt
 
-    # Adding appropriate PATH & MANPATH variable for use with MacPorts.
-    if [ -d /opt/local/etc/macports ]; then
-        export PATH=/opt/local/bin:/opt/local/sbin:$PATH
-        export MANPATH=/opt/local/share/man:$MANPATH
-    fi
 
-    # Textmate Shortcut (Must have mate command installed from Textmate 'About' Menu)
-    if [ -f ${textmate} ]; then
-        alias m8="${textmate} $1"
-    fi
-    
-    # Use custom shell prompt
-    PROMPT_COMMAND=bash_prompt_command
-    set_bash_prompt
-    unset set_bash_prompt
-}
+elif [ "$PLATFORM" == "darwin" ]; then
+  
+  # Define Mac specific configuration  
 
-# Are we on Linux?
-if [ `uname -s` = "Linux" ]; then
-    system_linux
+  textmate=`which mate`
+  
+  # Textmate for every editor
+  if [ -f ${textmate} ]; then
+      export EDITOR=${textmate}
+  fi
+
+  # Adding appropriate PATH & MANPATH variable for use with MacPorts.
+  if [ -d /opt/local/etc/macports ]; then
+      export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+      export MANPATH=/opt/local/share/man:$MANPATH
+  fi
+
+  # Textmate Shortcut (Must have mate command installed from Textmate 'About' Menu)
+  if [ -f ${textmate} ]; then
+      alias m8="${textmate} $1"
+  fi
+  
+  # Use custom shell prompt
+  PROMPT_COMMAND=bash_prompt_command
+  set_bash_prompt
+  unset set_bash_prompt
+  
 fi
 
-# Are we on OS X?
-# TODO: Not yet tested
-if [ `uname -s` = "Darwin" ]; then
-    system_darwin
-fi
+
 
 
 # Functions -------------------------------------------------------------
+
+
+set_platform() {
+  if [ `uname -s` = "Linux" ]; then
+    export PLATFORM="linux"
+  elif [ `uname -s` = "Darwin" ]; then
+    export PLATFORM="darwin"
+  else
+    export PLATFORM="other"
+  fi
+}
 
 
 set_source_directory() {
