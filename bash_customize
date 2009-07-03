@@ -17,13 +17,25 @@ export HISTFILESIZE=5000
 alias .p='source ~/.bash_customize && echo "Reloading bash customizations..."'
 
 # Shortcuts
+alias ?="h | g $1"
+alias ..='cd ..'
+alias ...='cd .. ; cd ..'
+## lists folders and files sizes in the current folder
+alias ducks='du -cksh * | sort -rn|head -11' 
+alias f='find . -iname'
 alias g="grep --color=auto"
 alias h="history"
-alias ll="ls -laF --color=auto"
-alias x="exit"
-alias ?="h | g $1"
-alias ps?="ps ax | g $1"
 alias hexkey64="dd if=/dev/random bs=1 count=16 2>/dev/null |xxd -ps"
+alias la='ls -a'
+alias ll="ls -laF --color=auto"
+alias m='more'
+# from: http://lifehacker.com/software/how-to/turbocharge-your-terminal-274317.php
+alias profileme="history | \
+                 awk '{print \$2}' | \
+                 awk 'BEGIN{FS=\"|\"}{print \$1}' | \
+                 sort | uniq -c | sort -n | tail -n 20 | sort -nr"
+alias ps?="ps ax | g $1"
+alias x="exit"
 
 rubygems_paths() {
 
