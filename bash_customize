@@ -37,6 +37,35 @@ alias profileme="history | \
 alias ps?="ps ax | g $1"
 alias x="exit"
 
+set_source_directory() {
+  PRG="$BASH_SOURCE"
+  progname=`basename "$BASH_SOURCE"`
+
+  while [ -h "$PRG" ] ; do
+      ls=`ls -ld "$PRG"`
+      link=`expr "$ls" : '.*-> \(.*\)$'`
+      if expr "$link" : '/.*' > /dev/null; then
+          PRG="$link"
+      else
+          PRG=`dirname "$PRG"`"/$link"
+      fi
+  done
+
+  export SOURCE_DIRECTORY=$(dirname "$PRG")  
+}
+
+set_source_directory
+
+include_optional_scripts() {
+  
+  # 
+  for file in "$SOURCE_DIRECTORY"/bash.*
+  do
+    . $file
+  done
+}
+include_optional_scripts
+
 rubygems_paths() {
 
     export GEM_HOME=$HOME/.gem/ruby/1.8
