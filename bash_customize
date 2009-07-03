@@ -162,21 +162,10 @@ bash_prompt() {
 
 
     # Prompt with git branch
-    PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMY}\${NEW_PWD} ${EMR}\$(git_completion) \n ${EMW}\$ ${N}"
+    PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMR}\`ruby -e \"print (%x{git branch 2> /dev/null}.grep(/^\*/).first || '').gsub(/^\* (.+)$/, '\1 ')\"\`${EMY}\${NEW_PWD} \n ${EMW}\$ ${N}"
 
 }
 
-git_completion() {
-  # include .git-completion.bash if it exists
-  if [ -f ~/.git-completion.bash ]; then
-      . ~/.git-completion.bash
-      __git_ps1 "(%s)"
-  else
-    `ruby -e "print (%x{git branch 2> /dev/null}.grep(/^\*/).first || '').gsub(/^\* (.+)$/, '\1 ')"`
-  fi  
-  
-  
-}
 
 # Define Linux specific configuration
 system_linux() {
