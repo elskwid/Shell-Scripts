@@ -37,6 +37,72 @@ alias profileme="history | \
 alias ps?="ps ax | g $1"
 alias x="exit"
 
+
+# Things to do -------------------------------------------------------------
+
+set_source_directory
+
+include_optional_scripts
+
+set_custom_path
+
+# Define Linux specific configuration
+system_linux() {
+
+    # Shortcut for text editor
+    if [ -f `which komodo` ]; then
+        alias m8='`which komodo` $1'
+    fi
+
+    # Use custom shell prompt
+    PROMPT_COMMAND=bash_prompt_command
+    set_bash_prompt
+    unset_bash_prompt
+}
+
+# Define Mac specific configuration
+# TODO: Not yet tested
+system_darwin() {
+    
+    local textmate=`which mate`
+    
+    # Textmate for every editor
+    if [ -f ${textmate} ]; then
+        export EDITOR=${textmate}
+    fi
+
+    # Adding appropriate PATH & MANPATH variable for use with MacPorts.
+    if [ -d /opt/local/etc/macports ]; then
+        export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+        export MANPATH=/opt/local/share/man:$MANPATH
+    fi
+
+    # Textmate Shortcut (Must have mate command installed from Textmate 'About' Menu)
+    if [ -f ${textmate} ]; then
+        alias m8="${textmate} $1"
+    fi
+    
+    # Use custom shell prompt
+    PROMPT_COMMAND=bash_prompt_command
+    set_bash_prompt
+    unset set_bash_prompt
+}
+
+# Are we on Linux?
+if [ `uname -s` = "Linux" ]; then
+    system_linux
+fi
+
+# Are we on OS X?
+# TODO: Not yet tested
+if [ `uname -s` = "Darwin" ]; then
+    system_darwin
+fi
+
+
+# Functions -------------------------------------------------------------
+
+
 set_source_directory() {
   PRG="$BASH_SOURCE"
   progname=`basename "$BASH_SOURCE"`
@@ -51,22 +117,19 @@ set_source_directory() {
       fi
   done
 
-  export SOURCE_DIRECTORY=$(dirname "$PRG")  
+  SOURCE_DIRECTORY=$(dirname "$PRG")  
 }
 
-set_source_directory
 
 include_optional_scripts() {
-  
-  # 
   for file in "$SOURCE_DIRECTORY"/bash.*
   do
     . $file
   done
 }
-include_optional_scripts
 
-rubygems_paths() {
+
+set_rubygems_paths() {
 
     export GEM_HOME=$HOME/.gem/ruby/1.8
 
@@ -78,10 +141,11 @@ rubygems_paths() {
     fi
 }
 
+
 # Function for containing PATH customizations
-custom_path() {
+set_custom_path() {
     
-    rubygems_paths
+    set_rubygems_paths
 
     # TODO: Replace with case statment or other more better logic
     if [ -d ~/bin ]; then
@@ -89,7 +153,7 @@ custom_path() {
     fi
 
 }
-custom_path
+
 
 ##################################################
 # Fancy PWD display function
@@ -118,7 +182,7 @@ bash_prompt_command() {
 
 
 # Function for custom font w/color list so I never have to look them up again
-bash_prompt() {
+set_bash_prompt() {
 
     case $TERM in
      xterm*|rxvt*)
@@ -166,6 +230,7 @@ bash_prompt() {
 
 }
 
+
 git_completion() {
   # include .git-completion.bash if it exists
   if [ -f ~/.git-completion.bash ]; then
@@ -174,60 +239,4 @@ git_completion() {
   else
     `ruby -e "print (%x{git branch 2> /dev/null}.grep(/^\*/).first || '').gsub(/^\* (.+)$/, '\1 ')"`
   fi  
-  
-  
 }
-
-# Define Linux specific configuration
-system_linux() {
-
-    # Shortcut for text editor
-    if [ -f `which komodo` ]; then
-        alias m8='`which komodo` $1'
-    fi
-
-    # Use custom shell prompt
-    PROMPT_COMMAND=bash_prompt_command
-    bash_prompt
-    unset bash_prompt
-}
-
-# Define Mac specific configuration
-# TODO: Not yet tested
-system_darwin() {
-    
-    local textmate=`which mate`
-    
-    # Textmate for every editor
-    if [ -f ${textmate} ]; then
-        export EDITOR=${textmate}
-    fi
-
-    # Adding appropriate PATH & MANPATH variable for use with MacPorts.
-    if [ -d /opt/local/etc/macports ]; then
-        export PATH=/opt/local/bin:/opt/local/sbin:$PATH
-        export MANPATH=/opt/local/share/man:$MANPATH
-    fi
-
-    # Textmate Shortcut (Must have mate command installed from Textmate 'About' Menu)
-    if [ -f ${textmate} ]; then
-        alias m8="${textmate} $1"
-    fi
-    
-    # Use custom shell prompt
-    PROMPT_COMMAND=bash_prompt_command
-    bash_prompt
-    unset bash_prompt
-}
-
-# Are we on Linux?
-if [ `uname -s` = "Linux" ]; then
-    system_linux
-fi
-
-# Are we on OS X?
-# TODO: Not yet tested
-if [ `uname -s` = "Darwin" ]; then
-    system_darwin
-fi
-
