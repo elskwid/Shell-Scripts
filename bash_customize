@@ -5,6 +5,9 @@
 #       . ~/.bash_customize
 #   fi
 
+# This file can change often. Easy reload.
+alias .p='source ~/.bash_customize && echo "Reloading bash customizations..."'
+
 # Set BASH_CUSTOMIZE_DIR (where the bash_customize is linked from)
 PRG="$BASH_SOURCE"
 progname=`basename "$BASH_SOURCE"`
@@ -24,16 +27,16 @@ export BASH_CUSTOMIZE_DIR=$(dirname "$PRG")
 # Include functions
 . "$BASH_CUSTOMIZE_DIR"/bash_functions
 
-########################################################################
-# Non-System Specific Configuations
-########################################################################
 
-# History control
-export HISTCONTROL=ignoreboth
-export HISTFILESIZE=5000
 
-# This file can change often. Easy reload.
-alias .p='source ~/.bash_customize && echo "Reloading bash customizations..."'
+
+# All platforms ----------------------------------------------------------
+
+set_platform
+
+include_optional_scripts
+
+set_custom_path
 
 # Shortcuts
 alias ?="h | g $1"
@@ -56,21 +59,16 @@ alias profileme="history | \
 alias ps?="ps ax | g $1"
 alias x="exit"
 
+# History control
+export HISTCONTROL=ignoreboth
+export HISTFILESIZE=5000
 
-# Things to do -----------------------------------------------------------
-set_platform
-
-set_source_directory
-
-include_optional_scripts
-
-set_custom_path
-
-# All platforms ----------------------------------------------------------
 
 # Use custom shell prompt
 export PROMPT_COMMAND=bash_prompt_command
+
 set_bash_prompt
+
 unset set_bash_prompt
 
 
