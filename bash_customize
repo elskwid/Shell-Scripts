@@ -91,6 +91,9 @@ elif [ "$PLATFORM" == "darwin" ]; then
   
   # Define Mac specific configuration  
 
+  # can't use color switch on mac
+  alias ll="ls -laF"
+  
   textmate=`which mate`
   
   # Textmate for every editor
