@@ -1,42 +1,163 @@
 #!/usr/bin/env bash
+
+
 # Customize login shell
 # Add to .bashrc, .bash_profile or .profile by appending:
 #   if [ -f ~/.bash_customize ]; then
 #       . ~/.bash_customize
 #   fi
+#
+# Put local overrides in ~/.bash_customize.local - this
+# file is included when preset
+
 
 # This file can change often. Easy reload.
 alias .p='source ~/.bash_customize && echo "Reloading bash customizations..."'
 
-# Set BASH_CUSTOMIZE_DIR (where the bash_customize is linked from)
-PRG="$BASH_SOURCE"
-progname=`basename "$BASH_SOURCE"`
+# ---------------------------------------------------------------------
+# Expose the colors to our scripts 
+# ---------------------------------------------------------------------
 
-while [ -h "$PRG" ] ; do
-  ls=`ls -ld "$PRG"`
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '/.*' > /dev/null; then
-    PRG="$link"
-  else
-    PRG=`dirname "$PRG"`"/$link"
+# (This allows use of the same color variables in bash_customize.local)
+# regular colors
+N="\[\033[0m\]"       # no colors (reset)
+K="\[\033[0;30m\]"    # black
+R="\[\033[0;31m\]"    # red
+G="\[\033[0;32m\]"    # green
+Y="\[\033[0;33m\]"    # yellow
+B="\[\033[0;34m\]"    # blue
+M="\[\033[0;35m\]"    # magenta
+C="\[\033[0;36m\]"    # cyan
+W="\[\033[0;37m\]"    # white
+
+# emphasized (bolded) colors
+EMK="\[\033[1;30m\]"
+EMR="\[\033[1;31m\]"
+EMG="\[\033[1;32m\]"
+EMY="\[\033[1;33m\]"
+EMB="\[\033[1;34m\]"
+EMM="\[\033[1;35m\]"
+EMC="\[\033[1;36m\]"
+EMW="\[\033[1;37m\]"
+
+# background colors
+BGK="\[\033[40m\]"
+BGR="\[\033[41m\]"
+BGG="\[\033[42m\]"
+BGY="\[\033[43m\]"
+BGB="\[\033[44m\]"
+BGM="\[\033[45m\]"
+BGC="\[\033[46m\]"
+BGW="\[\033[47m\]"
+
+
+# ---------------------------------------------------------------------
+# Functions
+# ---------------------------------------------------------------------
+
+set_rubygems_paths() {
+
+  export GEM_HOME=$HOME/.gem/ruby/1.8
+
+  gem env path &> /dev/null
+  
+  if [ $? -eq 0 ]; then
+    local gem_bin="`gem env path | sed -e 's/\:/\/bin\:/' -e 's/$/\/bin/'`"
+    export PATH=${gem_bin}:$PATH
   fi
-done
-
-export BASH_CUSTOMIZE_DIR=$(dirname "$PRG")  
-
-# Include functions
-. "$BASH_CUSTOMIZE_DIR"/bash_functions
+}
 
 
+# Create fancy bash prompt command where 
+# the home directory (HOME) is replaced with a ~
+#
+# The last pwdmaxlen characters of the PWD are displayed
+# Leading partial directory names are striped off
+#
+# /home/me/stuff          -> ~/stuff               if USER=me
+# /usr/share/big_dir_name -> ../share/big_dir_name if pwdmaxlen=20
+bash_prompt_command() {
+  
+  # How many characters of the $PWD should be kept
+  local pwdmaxlen=25
+  
+  # Indicate that there has been dir truncation
+  local trunc_symbol=".."
+  local dir=${PWD##*/}
+  
+  pwdmaxlen=$(( ( pwdmaxlen < ${#dir} ) ? ${#dir} : pwdmaxlen ))
+  
+  NEW_PWD=${PWD/#$HOME/\~}
+  
+  local pwdoffset=$(( ${#NEW_PWD} - pwdmaxlen ))
+  if [ ${pwdoffset} -gt "0" ]
+  then
+    NEW_PWD=${NEW_PWD:$pwdoffset:$pwdmaxlen}
+    NEW_PWD=${trunc_symbol}/${NEW_PWD#*/}
+  fi
+    
+}
 
 
-# All platforms ----------------------------------------------------------
+set_titlebar() {
 
-set_platform
+  case $TERM in
+   xterm*|rxvt*)
+     local TITLEBAR='\[\033]0;\u:${NEW_PWD}\007\]'
+      ;;
+   *)
+     local TITLEBAR=""
+      ;;
+  esac
 
-include_optional_scripts
+}
 
-set_custom_path
+
+# Will include ~/.git-completion.bach (distrubuted with Git) if present
+# and creats a string display of the current branch. Falls back to a Ruby
+# method if git-completion isn't available.
+git_completion() {
+  # include .git-completion.bash if it exists
+  if [ -f ~/.git-completion.bash ]; then
+      . ~/.git-completion.bash
+      __git_ps1 "(%s)"
+  else
+    `ruby -e "print (%x{git branch 2> /dev/null}.grep(/^\*/).first || '').gsub(/^\* (.+)$/, '\1 ')"`
+  fi  
+}
+
+
+
+# ---------------------------------------------------------------------
+# All platforms
+# ---------------------------------------------------------------------
+
+# Set the platform
+if [ `uname -s` = "Linux" ]; then
+  export PLATFORM="linux"
+elif [ `uname -s` = "Darwin" ]; then
+  export PLATFORM="darwin"
+else
+  export PLATFORM="other"
+fi
+
+
+# Include user's bin directory
+if [ -d ~/bin ]; then
+  export PATH=~/bin:$PATH
+fi
+
+# History control
+export HISTCONTROL=ignoreboth
+export HISTFILESIZE=5000
+
+# Use custom shell prompt
+export PROMPT_COMMAND=bash_prompt_command
+
+set_titlebar && unset set_titlebar
+
+# Prompt with git branch
+PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMY}\${NEW_PWD} ${EMR}\$(git_completion) \n ${EMW}\$ ${N}"
 
 # Shortcuts
 alias ?="h | g $1"
@@ -59,38 +180,26 @@ alias profileme="history | \
 alias ps?="ps ax | g $1"
 alias x="exit"
 
-# History control
-export HISTCONTROL=ignoreboth
-export HISTFILESIZE=5000
 
-# Use custom shell prompt
-export PROMPT_COMMAND=bash_prompt_command
+# ---------------------------------------------------------------------
+# Platform specific settings
+# ---------------------------------------------------------------------
 
-set_titlebar
-
-unset set_titlebar
-
-# Prompt with git branch
-PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMY}\${NEW_PWD} ${EMR}\$(git_completion) \n ${EMW}\$ ${N}"
-
-
-
-# Platform specific settings ---------------------------------------------
-
+## linux --------------------------------------------------------------
 if [ "$PLATFORM" == "linux" ]; then
   
-  # Define Linux specific configuration
-
+  
   # Shortcut for text editor
   if [ -f `which komodo` ]; then
-      alias m8='`which komodo` $1'
+    alias m8='`which komodo` $1'
+  else
+    alias m8='`vi $1`'
   fi
 
 
+## mac ----------------------------------------------------------------
 elif [ "$PLATFORM" == "darwin" ]; then
   
-  # Define Mac specific configuration  
-
   # can't use color switch on mac
   alias ll="ls -laF"
   
@@ -114,6 +223,13 @@ elif [ "$PLATFORM" == "darwin" ]; then
 
   
 fi
+# ---------------------------------------------------------------------
+# End Platform specific settings
+# ---------------------------------------------------------------------
 
-# Include the bash_customize.local for post changes
-include_local
+
+# Include the .bash_customize.local for post changes
+[ -f ~/.bash_customize.local ] && . ~/.bash_customize.local
+
+
+# EOF
