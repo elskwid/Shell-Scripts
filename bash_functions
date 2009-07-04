@@ -1,5 +1,4 @@
 # Functions -------------------------------------------------------------
-echo "FUNCTIONS"
 
 # Expose the colors to our scripts 
 
@@ -56,6 +55,13 @@ include_optional_scripts() {
   
 }
 
+include_local() {
+  
+  dotlocal="$BASH_CUSTOMIZE_DIR"/bash_customize.local
+  
+  [ -f $dotlocal ] && . $dotlocal
+  
+}
 
 set_rubygems_paths() {
 
