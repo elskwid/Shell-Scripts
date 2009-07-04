@@ -63,13 +63,16 @@ alias x="exit"
 export HISTCONTROL=ignoreboth
 export HISTFILESIZE=5000
 
-
 # Use custom shell prompt
 export PROMPT_COMMAND=bash_prompt_command
 
-set_bash_prompt
+set_titlebar
 
-unset set_bash_prompt
+unset set_titlebar
+
+# Prompt with git branch
+PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMY}\${NEW_PWD} ${EMR}\$(git_completion) \n ${EMW}\$ ${N}"
+
 
 
 # Platform specific settings ---------------------------------------------

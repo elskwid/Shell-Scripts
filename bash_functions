@@ -1,6 +1,39 @@
 # Functions -------------------------------------------------------------
 echo "FUNCTIONS"
 
+# Expose the colors to our scripts 
+
+# regular colors
+N="\[\033[0m\]"       # no colors (reset)
+K="\[\033[0;30m\]"    # black
+R="\[\033[0;31m\]"    # red
+G="\[\033[0;32m\]"    # green
+Y="\[\033[0;33m\]"    # yellow
+B="\[\033[0;34m\]"    # blue
+M="\[\033[0;35m\]"    # magenta
+C="\[\033[0;36m\]"    # cyan
+W="\[\033[0;37m\]"    # white
+
+# emphasized (bolded) colors
+EMK="\[\033[1;30m\]"
+EMR="\[\033[1;31m\]"
+EMG="\[\033[1;32m\]"
+EMY="\[\033[1;33m\]"
+EMB="\[\033[1;34m\]"
+EMM="\[\033[1;35m\]"
+EMC="\[\033[1;36m\]"
+EMW="\[\033[1;37m\]"
+
+# background colors
+BGK="\[\033[40m\]"
+BGR="\[\033[41m\]"
+BGG="\[\033[42m\]"
+BGY="\[\033[43m\]"
+BGB="\[\033[44m\]"
+BGM="\[\033[45m\]"
+BGC="\[\033[46m\]"
+BGW="\[\033[47m\]"
+
 set_platform() {
   
   if [ `uname -s` = "Linux" ]; then
@@ -83,7 +116,7 @@ bash_prompt_command() {
 
 
 # Function for custom font w/color list so I never have to look them up again
-set_bash_prompt() {
+set_titlebar() {
 
   case $TERM in
    xterm*|rxvt*)
@@ -93,41 +126,6 @@ set_bash_prompt() {
      local TITLEBAR=""
       ;;
   esac
-        
-  # regular colors
-  local N="\[\033[0m\]"       # no colors (reset)
-  local K="\[\033[0;30m\]"    # black
-  local R="\[\033[0;31m\]"    # red
-  local G="\[\033[0;32m\]"    # green
-  local Y="\[\033[0;33m\]"    # yellow
-  local B="\[\033[0;34m\]"    # blue
-  local M="\[\033[0;35m\]"    # magenta
-  local C="\[\033[0;36m\]"    # cyan
-  local W="\[\033[0;37m\]"    # white
-
-  # emphasized (bolded) colors
-  local EMK="\[\033[1;30m\]"
-  local EMR="\[\033[1;31m\]"
-  local EMG="\[\033[1;32m\]"
-  local EMY="\[\033[1;33m\]"
-  local EMB="\[\033[1;34m\]"
-  local EMM="\[\033[1;35m\]"
-  local EMC="\[\033[1;36m\]"
-  local EMW="\[\033[1;37m\]"
-
-  # background colors
-  local BGK="\[\033[40m\]"
-  local BGR="\[\033[41m\]"
-  local BGG="\[\033[42m\]"
-  local BGY="\[\033[43m\]"
-  local BGB="\[\033[44m\]"
-  local BGM="\[\033[45m\]"
-  local BGC="\[\033[46m\]"
-  local BGW="\[\033[47m\]"
-
-
-  # Prompt with git branch
-  PS1="${W}<`uname -s` shell of doom:\h> [h:\! j:\j] ${EMY}\${NEW_PWD} ${EMR}\$(git_completion) \n ${EMW}\$ ${N}"
 
 }
 
