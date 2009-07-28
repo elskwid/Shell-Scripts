@@ -2,3 +2,4 @@ nbproject
 bash.*
 bash_customize.local
 ssh_aliases.local
+*.swp

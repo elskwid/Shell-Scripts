@@ -122,7 +122,8 @@ git_completion() {
       . ~/.git-completion.bash
       __git_ps1 "(%s)"
   else
-    `ruby -e "print (%x{git branch 2> /dev/null}.grep(/^\*/).first || '').gsub(/^\* (.+)$/, '\1 ')"`
+    ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+    echo "("${ref#refs/heads/}")"
   fi  
 }
 
