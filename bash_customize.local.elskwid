@@ -48,7 +48,7 @@ alias top='top -o cpu'
 # ---------------------------------------------------------------------
 # prompts
 # ---------------------------------------------------------------------
-export PS1="${Y}\${NEW_PWD}${G} \$(git_completion)${N} \n ${W}> ${N}"
+export PS1="${Y}@`hostname` \${NEW_PWD}${G} \$(git_completion)${N} \n ${W}> ${N}"
 # export PS1='\w$(git_completion) >'
 export PS2='> ' 
 export PS3='#? '
@@ -125,7 +125,7 @@ if [ "$PLATFORM" == "darwin" ]; then
 
   alias ls='ls -G'
 	alias m8="mate $1"
-	alias m8p="mate ~/.bashrc ~/.bash_customize ~/.bash_customize.local"
+	alias m8p="mate ~/.bashrc ~/.bash_customize ~/.bash_customize.local ~/.ssh_aliases.local"
 	alias m8c="mate ~/.caprc"
 	alias m8sake="mate ~/projects/sake-tasks"
 	alias railsbundleup="cd ~/Library/Application\\ Support/TextMate/Bundles/Ruby\\ on\\ Rails.tmbundle && git pull && osascript -e 'tell app \"TextMate\" to reload bundles' && cd --"
