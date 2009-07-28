@@ -1,0 +1,196 @@
+## Runs after everything else so we can mux it up
+
+# ---------------------------------------------------------------------
+# Functions to use in this script
+# ---------------------------------------------------------------------
+
+pathadd() {
+  if [ "$2" = "after" ] ; then
+    PATH=$PATH:$1
+  else
+    PATH=$1:$PATH
+  fi
+}
+
+# Only add to the path if it isn't there
+pathmunge () {
+  local egrep=`which egrep`
+
+  if ! echo $PATH | $egrep -q "(^|:)$1($|:)" ; then
+    if [ "$2" = "after" ] ; then
+      PATH=$PATH:$1
+    else
+      PATH=$1:$PATH
+    fi
+  fi
+}
+
+# ---------------------------------------------------------------------
+# All platforms
+# ---------------------------------------------------------------------
+
+# export PATH=/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/local/sbin:/usr/local/sphinx/bin:/opt/local/lib/mysql5/bin:/opt/local/lib/postgresql83/bin:$PATH
+
+pathadd /usr/local/sbin
+pathadd /usr/local/bin 
+pathmunge /usr/local/sphinx/bin after
+pathmunge /usr/local/jruby-1.3.1/bin after
+
+# ---------------------------------------------------------------------
+# aliases
+# ---------------------------------------------------------------------
+alias df='df -h'
+alias gi="grep -i"
+alias listusers='dscl localhost -list /Local/Default/Users'
+alias systail='tail -f /var/log/system.log'
+alias top='top -o cpu'
+
+# ---------------------------------------------------------------------
+# prompts
+# ---------------------------------------------------------------------
+export PS1="${Y}\${NEW_PWD}${G} \$(git_completion)${N} \n ${W}> ${N}"
+# export PS1='\w$(git_completion) >'
+export PS2='> ' 
+export PS3='#? '
+export PS4='+'
+
+# ---------------------------------------------------------------------
+# SSH aliases and such
+# ---------------------------------------------------------------------
+
+# tab completion for ssh hosts
+# http://drawohara.tumblr.com/post/6584031# 
+if [ -f ~/.ssh/known_hosts ]; then
+	SSH_COMPLETE=( $(cat ~/.ssh/known_hosts | \
+	cut -f 1 -d ' ' | \
+	sed -e s/,.*//g | \
+	uniq | \
+	egrep -v [0123456789]) )
+	complete -o default -W "${SSH_COMPLETE[*]}" ssh
+fi
+
+# Include the .ssh_aliases.local for post changes
+[ -f ~/.ssh_aliases.local ] && . ~/.ssh_aliases.local
+
+# ---------------------------------------------------------------------
+# platform specific settings
+# ---------------------------------------------------------------------
+
+## mac ----------------------------------------------------------------
+if [ "$PLATFORM" == "darwin" ]; then
+  
+  pathmunge /opt/local/lib/postgresql83/bin after
+  pathmunge /opt/local/mysql5/bin after
+  pathmunge /opt/local/sbin  
+  pathmunge /opt/local/bin  
+  
+  # colors
+  # The color designators are as follows:
+  #       a     black
+  #       b     red
+  #       c     green
+  #       d     brown
+  #       e     blue
+  #       f     magenta
+  #       g     cyan
+  #       h     light grey
+  #       A     bold black, usually shows up as dark grey
+  #       B     bold red
+  #       C     bold green
+  #       D     bold brown, usually shows up as yellow
+  #       E     bold blue
+  #       F     bold magenta
+  #       G     bold cyan
+  #       H     bold light grey; looks like bright white
+  #       x     default foreground or background
+  # The order of the attributes are as follows:
+  #       1.   directory
+  #       2.   symbolic link
+  #       3.   socket
+  #       4.   pipe
+  #       5.   executable
+  #       6.   block special
+  #       7.   character special
+  #       8.   executable with setuid bit set
+  #       9.   executable with setgid bit set
+  #       10.  directory writable to others, with sticky bit
+  #       11.  directory writable to others, without sticky bit
+  # LSCOLORS="exfxcxdxbxegedabagacad"  default
+  
+  LSCOLORS="dxfxcxexbxegedabagacad"
+  export LSCOLORS
+  
+  export EDITOR='mate -w'
+	export SVN_EDITOR="mate -w"
+
+  alias ls='ls -G'
+	alias m8="mate $1"
+	alias m8p="mate ~/.bashrc ~/.bash_customize ~/.bash_customize.local"
+	alias m8c="mate ~/.caprc"
+	alias m8sake="mate ~/projects/sake-tasks"
+	alias railsbundleup="cd ~/Library/Application\\ Support/TextMate/Bundles/Ruby\\ on\\ Rails.tmbundle && git pull && osascript -e 'tell app \"TextMate\" to reload bundles' && cd --"
+	if [ -f ~/.irbc ]; then
+		alias m8irb="mate ~/.irbrc"
+	fi
+
+## linux  -------------------------------------------------------------
+elif [ "$PLATFORM" == "linux" ]; then
+  
+  export EDITOR='vim'
+	export SVN_EDITOR="/usr/bin/vim"
+	
+	# colors
+  alias ls='ls --color=auto'
+  
+  # ls colors, see: http://www.linux-sxs.org/housekeeping/lscolors.html
+  #export LS_COLORS='di=1:fi=0:ln=31:pi=5:so=5:bd=5:cd=5:or=31:mi=0:ex=35:*.rb=90'  #LS_COLORS is not supported by the default ls command in OS-X
+  
+	alias wheel="sudo usermod -G adm,dialout,cdrom,floppy,audio,dip,video,plugdev,netdev,scanner,lpadmin,admin -a $1"  
+	
+fi
+
+
+
+# ---------------------------------------------------------------------
+# functions--
+# ---------------------------------------------------------------------
+whereami() {
+  
+  echo "${USER}@`hostname`:${PLATFORM} [$(date +%H:%M)]"
+  
+}
+
+stats(){
+  
+  ECHO_NC='\e[0m' # No Color
+  ECHO_WHITE='\e[1;37m'
+  ECHO_BLACK='\e[0;30m'
+  ECHO_BLUE='\e[0;34m'
+  ECHO_LBLUE='\e[1;34m'
+  ECHO_GREEN='\e[0;32m'
+  ECHO_LGREEN='\e[1;32m'
+  ECHO_CYAN='\e[0;36m'
+  ECHO_LCYAN='\e[1;36m'
+  ECHO_RED='\e[0;31m'
+  ECHO_LRED='\e[1;31m'
+  ECHO_PURPLE='\e[0;35m'
+  ECHO_LPURPLE='\e[1;35m'
+  ECHO_BROWN='\e[0;33m'
+  ECHO_YELLOW='\e[1;33m'
+  ECHO_GRAY='\e[1;30m'
+  ECHO_LGRAY='\e[0;37m'
+
+  # From http://blog.infinitered.com/entries/show/4
+  # Hello Messsage --------------------------------------------------
+  echo -e "${ECHO_NC}"
+  echo -e "Kernel Information: " `uname -smr`
+  echo -e "${ECHO_GREEN}`bash --version`"
+  echo -ne "${ECHO_LGRAY}Uptime: "; uptime
+  echo -ne "${ECHO_LGRAY}Server time is: "; date
+  echo -e "${ECHO_NC}Platform: $PLATFORM"
+  echo -e "${ECHO_NC}"  
+  
+}
+
+
+# EOF
